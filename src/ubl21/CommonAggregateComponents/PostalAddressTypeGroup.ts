@@ -1,6 +1,7 @@
 import GenericAggregateComponent, { IGenericKeyValue, ParamsMapValues } from './GenericAggregateComponent';
 import { UdtIdentifier, UdtName, UdtText } from '../types/UnqualifiedDataTypes';
 import { Country } from './CountryTypeGroup';
+import { AddressLine, AddressLineParams } from './AddressLine';
 
 /*
 
@@ -34,7 +35,7 @@ The subdivision of a country.
 
 Example value: Region A
 
-0..1	cac:AddressLine	
+0..*	cac:AddressLine	
 ADDRESS LINE
 1..1	cac:Country	
 COUNTRY
@@ -47,7 +48,7 @@ const ParamsMap: IGenericKeyValue<ParamsMapValues> = {
   postalZone: { order: 4, attributeName: 'cbc:PostalZone', min: 0, max: 1, classRef: UdtText },
   countrySubentity: { order: 5, attributeName: 'cbc:CountrySubentity', min: 0, max: 1, classRef: UdtText },
   CountrySubentityCode: { order: 5, attributeName: 'cbc:CountrySubentityCode', min: 0, max: 1, classRef: UdtText },
-  addressLine: { order: 6, attributeName: 'cac:AddressLine', min: 0, max: 1, classRef: UdtText },
+  addressLines: { order: 6, attributeName: 'cac:AddressLine', min: 0, max: undefined, classRef: AddressLine },
   country: { order: 7, attributeName: 'cac:Country', min: 0, max: 1, classRef: Country },
 };
 
@@ -64,7 +65,7 @@ type AllowedParams = {
   countrySubentity?: string | UdtText;
   CountrySubentityCode?: string | UdtText;
   /* ADDRESS LINE */
-  addressLine?: string | UdtText | UdtIdentifier;
+  addressLines?: AddressLine[];
   /* COUNTRY */
   country?: Country;
 };
@@ -75,6 +76,28 @@ type AllowedParams = {
 class PostalAddressType extends GenericAggregateComponent {
   constructor(content: AllowedParams) {
     super(content, ParamsMap, 'cac:PostalAddress');
+  }
+
+  /**
+   * Add an address line to the postal address
+   * @param value AddressLine instance or AddressLineParams object
+   */
+  addAddressLine(value: AddressLine | AddressLineParams | string) {
+    if (!this.attributes.addressLines) {
+      this.attributes.addressLines = [];
+    }
+
+    let itemToPush: AddressLine;
+
+    if (value instanceof AddressLine) {
+      itemToPush = value;
+    } else if (typeof value === 'string') {
+      itemToPush = new AddressLine({ line: value });
+    } else {
+      itemToPush = new AddressLine(value);
+    }
+
+    this.attributes.addressLines.push(itemToPush);
   }
 }
 
