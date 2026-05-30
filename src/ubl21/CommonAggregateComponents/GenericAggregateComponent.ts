@@ -35,6 +35,7 @@ export default class GenericAggregateComponent {
     const jsonResponse: any = {};
     Object.keys(this.paramsMap)
       .filter((attkey) => this.attributes[attkey])
+      .sort((a, b) => this.paramsMap[a].order - this.paramsMap[b].order)
       .forEach((attKey) => {
         const { attributeName, max } = this.paramsMap[attKey];
         if (Array.isArray(this.attributes[attKey]) && max !== undefined) {
